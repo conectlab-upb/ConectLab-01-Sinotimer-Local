@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CONECTLAB_CL-P01_Sinotimer_Local_v1.0</title>
+<style>
+  :root {
+    --navy: #0b2f4a;
+    --teal: #00838f;
+    --teal-soft: #e0f4f4;
+    --amber: #d97706;
+    --amber-soft: #fff4e0;
+    --red: #b42318;
+    --red-soft: #fdecea;
+    --green: #15803d;
+    --green-soft: #e7f6ec;
+    --ink: #1c2733;
+    --muted: #5b6b7b;
+    --line: #d5dee7;
+    --bg: #f4f7fa;
+    --card: #ffffff;
+    --code-bg: #0f1d2b;
+    --code-ink: #d9f2f2;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+  }
+  header {
+    background: linear-gradient(120deg, var(--navy), var(--teal));
+    color: #fff;
+    padding: 28px 20px 22px;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+  header .brand { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+  header h1 { margin: 6px 0 6px; font-size: 28px; line-height: 1.2; }
+  header p { margin: 0; opacity: .92; max-width: 760px; }
+  .badges { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge {
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.3);
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 13px;
+  }
+  nav {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .wrap { display: flex; gap: 4px; overflow-x: auto; }
+  nav button {
+    border: 0; background: none; padding: 13px 14px;
+    font: inherit; font-weight: 600; color: var(--muted);
+    border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap;
+  }
+  nav button.active { color: var(--teal); border-bottom-color: var(--teal); }
+  main { padding: 22px 0 40px; }
+  section.tab { display: none; }
+  section.tab.active { display: block; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+  }
+  h2 { color: var(--navy); margin: 0 0 10px; font-size: 22px; }
+  h3 { color: var(--navy); margin: 18px 0 8px; font-size: 17px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .note, .warn, .danger, .ok {
+    border-radius: 10px; padding: 11px 14px; margin: 12px 0; font-size: 15px;
+  }
+  .note { background: var(--teal-soft); border-left: 4px solid var(--teal); }
+  .warn { background: var(--amber-soft); border-left: 4px solid var(--amber); }
+  .danger { background: var(--red-soft); border-left: 4px solid var(--red); }
+  .ok { background: var(--green-soft); border-left: 4px solid var(--green); }
+
+  /* progres */
+  .progress { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .bar { flex: 1; height: 10px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--teal), var(--green)); transition: width .3s; }
+  .progress span { font-weight: 700; color: var(--navy); min-width: 70px; text-align: right; }
+
+  /* pași */
+  .step {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .step > summary {
+    list-style: none; cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+  }
+  .step > summary::-webkit-details-marker { display: none; }
+  .num {
+    flex: 0 0 34px; height: 34px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--navy); color: #fff; font-weight: 700;
+  }
+  .step.done .num { background: var(--green); }
+  .step .title { font-weight: 700; flex: 1; }
+  .step .where { font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--line); padding: 2px 8px; border-radius: 99px; }
+  .step .body { padding: 0 18px 16px 62px; }
+  .step .body ol, .step .body ul { padding-left: 20px; }
+  .step .body li { margin: 4px 0; }
+  .check {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line);
+    font-weight: 600; color: var(--green);
+  }
+  .check input { width: 18px; height: 18px; accent-color: var(--green); }
+
+  /* cod */
+  .cmd { position: relative; margin: 8px 0 12px; }
+  .cmd pre {
+    margin: 0; background: var(--code-bg); color: var(--code-ink);
+    padding: 12px 70px 12px 14px; border-radius: 9px;
+    overflow-x: auto; font: 14px/1.45 Consolas, "Courier New", monospace;
+    white-space: pre;
+  }
+  .cmd .lbl { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  .cmd button.copy {
+    position: absolute; right: 8px; bottom: 8px;
+    background: var(--teal); color: #fff; border: 0; border-radius: 6px;
+    padding: 4px 10px; font-size: 12px; cursor: pointer;
+  }
+  .cmd button.copy.copied { background: var(--green); }
+  code.k { background: var(--teal-soft); padding: 1px 6px; border-radius: 5px; font-size: 14px; }
+
+  /* configurator */
+  label { display: block; font-weight: 600; font-size: 14px; margin: 10px 0 4px; }
+  input[type=text], select {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--line);
+    border-radius: 8px; font: inherit; background: #fff;
+  }
+  .btn {
+    background: var(--teal); color: #fff; border: 0; border-radius: 8px;
+    padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; margin: 12px 8px 0 0;
+  }
+  .btn.ghost { background: #fff; color: var(--teal); border: 1px solid var(--teal); }
+  [role=status] { font-size: 14px; color: var(--muted); min-height: 1.4em; margin-top: 8px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+  th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--bg); color: var(--navy); }
+  table input { width: 100%; border: 0; font: inherit; padding: 2px; background: transparent; }
+
+  .path { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .path .card h3 { margin-top: 0; }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 99px; }
+  .tag.go { background: var(--green-soft); color: var(--green); }
+  .tag.wait { background: var(--amber-soft); color: var(--amber); }
+
+  svg text { font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+  footer { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; padding: 16px 0 30px; }
+
+  @media (max-width: 700px) {
+    .grid2, .path { grid-template-columns: 1fr; }
+    .step .body { padding-left: 18px; }
+    header h1 { font-size: 22px; }
+  }
+  @media print {
+    nav, .copy, .btn, .noprint { display: none !important; }
+    section.tab { display: block !important; }
+    details { display: block; }
+    details > .body { display: block !important; }
+    body { background: #fff; }
+    .card, .step { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="brand">ConectLab EB104 · Laboratorul de Sisteme Conectate</div>
+    <h1>Sinotimer SVP-688W în Home Assistant, local, fără cloud</h1>
+    <p>Ghid pas cu pas: protectorul de energie WiFi (contor + protecție la supra/subtensiune și supracurent, șină DIN) trece din cloud-ul producătorului în rețeaua locală, comandat și citit doar din Home Assistant.</p>
+    <div class="badges">
+      <span class="badge">Cod CL-P01</span>
+      <span class="badge" id="verBadge">v1.0</span>
+      <span class="badge">Protocol Tuya local (LAN)</span>
+      <span class="badge">Home Assistant</span>
+    </div>
+  </div>
+</header>
+
+<nav class="noprint">
+  <div class="wrap" role="tablist">
+    <button class="active" data-tab="t1" role="tab">1 · Începe aici</button>
+    <button data-tab="t2" role="tab">2 · Pașii (Calea A)</button>
+    <button data-tab="t3" role="tab">3 · Configurator</button>
+    <button data-tab="t4" role="tab">4 · Calea B – firmware propriu</button>
+    <button data-tab="t5" role="tab">5 · Probleme și verificare</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- ===================== 1 · ÎNCEPE AICI ===================== -->
+<section class="tab active" id="t1">
+  <div class="card">
+    <h2>Ce rezolvăm</h2>
+    <p>Aparatul, așa cum vine din fabrică, trimite totul prin cloud-ul Tuya. Comanda din aplicația Smart Life pleacă în China/Europa și se întoarce în tablou. Ținta este ca <b>Home Assistant să vorbească direct cu aparatul, în rețeaua locală</b>, iar aparatul să nu mai aibă deloc acces la internet.</p>
+
+    <svg viewBox="0 0 960 330" width="100%" role="img" aria-label="Arhitectura înainte și după">
+      <!-- ÎNAINTE -->
+      <text x="20" y="26" font-size="17" font-weight="700" fill="#0b2f4a">ÎNAINTE – prin cloud</text>
+      <svg x="69" y="36" width="62" height="110" viewBox="460 95 400 710" role="img" aria-label="Releul Sinotimer SVP-688W"><defs><linearGradient id='pastbd'><stop offset='0' stop-color='#d9dde2'/><stop offset='.5' stop-color='#f4f6f8'/><stop offset='1' stop-color='#cfd4da'/></linearGradient><linearGradient id='pastfc' x2='0' y2='1'><stop offset='0' stop-color='#e9ecef'/><stop offset='1' stop-color='#d6dade'/></linearGradient><radialGradient id='pastsc'><stop offset='0' stop-color='#e8e8e8'/><stop offset='.7' stop-color='#9aa0a6'/><stop offset='1' stop-color='#5f656b'/></radialGradient><filter id='pastsh' x='-20%' y='-10%' width='140%' height='130%'><feDropShadow dy='10' stdDeviation='12' flood-opacity='.65'/></filter></defs><g filter='url(#pastsh)'><rect x='490' y='105' width='340' height='105' rx='6' fill='url(#pastbd)'/><rect x='470' y='200' width='380' height='470' rx='10' fill='url(#pastbd)' stroke='#b9c0c7'/><rect x='490' y='660' width='340' height='135' rx='6' fill='url(#pastbd)'/></g><circle cx='565' cy='155' r='26' fill='#fff' stroke='#c9ced3'/><circle cx='565' cy='155' r='19' fill='url(#pastsc)'/><path d='M554 155H576M565 144V166' stroke='#555' stroke-width='3'/><circle cx='755' cy='155' r='26' fill='#fff' stroke='#c9ced3'/><circle cx='755' cy='155' r='19' fill='url(#pastsc)'/><path d='M744 155H766M755 144V166' stroke='#555' stroke-width='3'/><circle cx='565' cy='740' r='26' fill='#fff' stroke='#c9ced3'/><circle cx='565' cy='740' r='19' fill='url(#pastsc)'/><path d='M554 740H576M565 729V751' stroke='#555' stroke-width='3'/><circle cx='755' cy='740' r='26' fill='#fff' stroke='#c9ced3'/><circle cx='755' cy='740' r='19' fill='url(#pastsc)'/><path d='M744 740H766M755 729V751' stroke='#555' stroke-width='3'/><rect x='632' y='137' width='56' height='36' rx='4' fill='#eef0f2' stroke='#cdd2d7'/><rect x='626' y='722' width='68' height='36' rx='4' fill='#eef0f2' stroke='#cdd2d7'/><text x='660' y='164' font-family='Arial' font-size='22' fill='#9aa1a8' text-anchor='middle'>IN</text><text x='660' y='749' font-family='Arial' font-size='22' fill='#9aa1a8' text-anchor='middle'>OUT</text><text x='565' y='698' font-family='Arial' font-size='20' fill='#9aa1a8' text-anchor='middle'>N</text><text x='755' y='698' font-family='Arial' font-size='20' fill='#9aa1a8' text-anchor='middle'>L</text><rect x='482' y='215' width='356' height='430' rx='8' fill='url(#pastfc)' stroke='#c3c9cf'/><text x='500' y='253' font-family='Arial' font-size='21' fill='#d6231f' font-weight='900'>SINOTIMER</text><text x='630' y='252' font-family='Arial' font-size='13' fill='#5a636c' >WiFi-Smart Meter&amp;Energy Protector</text><text transform='translate(492,337) rotate(90)' font-family='Arial' font-weight='700' font-size='13' fill='#3d454d'>SVP-688W</text><text x='486' y='490' font-family='Arial' font-size='15' fill='#3d454d' font-weight='700'>CE</text><rect x='506' y='299' width='308' height='192' rx='6' fill='#8b9198'/><rect x='512' y='305' width='296' height='180' rx='3' fill='#050608'/><g transform='translate(524,357) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='46' fill='#2a1010' letter-spacing='2'>8888</text></g><g transform='translate(672,357) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='50' fill='#2a1010' letter-spacing='2'>888</text></g><g transform='translate(534,415) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='44' fill='#121a36' letter-spacing='2'>888</text></g><g transform='translate(672,415) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='40' fill='#0f240f' letter-spacing='2'>888</text></g><g transform='translate(524,468) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='44' fill='#0f240f' letter-spacing='2'>888</text></g><g transform='translate(672,468) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='44' fill='#0f240f' letter-spacing='2'>888</text></g><text x='774' y='377' font-family='Arial' font-size='14' fill='#ff3b30' font-weight='700'>KW/h</text><text x='642' y='415' font-family='Arial' font-size='14' fill='#6f8cff' >V</text><text x='642' y='470' font-family='Arial' font-size='14' fill='#5fdc5f' >A</text><text x='774' y='417' font-family='Arial' font-size='14' fill='#5fdc5f' >mA</text><rect x='818' y='375' width='18' height='44' rx='3' fill='none' stroke='#7a828a'/><text x='522' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>PULSE</text><circle cx='522' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><text x='590' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>WIFI</text><circle cx='590' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><text x='658' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>V</text><circle cx='658' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><text x='726' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>A</text><circle cx='726' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><text x='794' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>LEAKAGE</text><circle cx='794' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><rect x='508' y='575' width='62' height='54' rx='8' fill='#f2f3f5' stroke='#c6ccd2'/><rect x='584' y='575' width='62' height='54' rx='8' fill='#f2f3f5' stroke='#c6ccd2'/><rect x='660' y='575' width='62' height='54' rx='8' fill='#f2f3f5' stroke='#c6ccd2'/><text x='539' y='610' font-family='Arial' font-size='17' fill='#2c5bd6' text-anchor='middle' font-weight='900'>SET</text><path d='M615 589l13 22h-26z' fill='#1e9aa6'/><text x='691' y='598' font-family='Arial' font-size='14' fill='#2c5bd6' text-anchor='middle' font-weight='900'>WIFI</text><path d='M691 621l-11-14h22z' fill='#1e9aa6'/><rect x='736' y='575' width='62' height='54' rx='8' fill='#e5302b' stroke='#b81f1b'/><path d='M758 593a14 14 0 1 0 20 0M768 587V603' fill='none' stroke='#fff' stroke-width='4' stroke-linecap='round'/>
+ 
+ <g transform="translate(724,341) skewX(-6)"><text id="pakwh" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="46" fill="#ff3b30" letter-spacing="2" style="filter:drop-shadow(0 0 5px #ff3b30)">0.0</text></g><g transform="translate(582,401) skewX(-6)"><text id="pav" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="42" fill="#6f8cff" letter-spacing="2" style="filter:drop-shadow(0 0 5px #6f8cff)">225</text></g><g transform="translate(724,401) skewX(-6)"><text id="pama" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="40" fill="#5fdc5f" letter-spacing="2" style="filter:drop-shadow(0 0 5px #5fdc5f)">0</text></g><g transform="translate(578,454) skewX(-6)"><text id="paa" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="40" fill="#5fdc5f" letter-spacing="2" style="filter:drop-shadow(0 0 5px #5fdc5f)">0.02</text></g><g transform="translate(724,453) skewX(-6)"><text id="past" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="40" fill="#5fdc5f" letter-spacing="2" style="filter:drop-shadow(0 0 5px #5fdc5f)"> ON</text></g>
+ <circle style="filter:drop-shadow(0 0 6px #ff3b30)" id="paled0" cx="522" cy="553" r="8" fill="#ff3b30"/><circle style="filter:drop-shadow(0 0 6px #ff3b30)" id="paled1" cx="590" cy="553" r="8" fill="#ff3b30"/><circle style="filter:drop-shadow(0 0 6px #ff3b30)" id="paled2" cx="658" cy="553" r="8" fill="#ff3b30"/><circle style="filter:drop-shadow(0 0 6px #4c7dff)" id="paled3" cx="726" cy="553" r="8" fill="#4c7dff"/><circle id="paled4" cx="794" cy="553" r="8" fill="#9aa1a8"/><rect id="papw" x="736" y="575" width="62" height="54" rx="8" fill="none" stroke="#ff5a3c" stroke-width="3" style="filter:drop-shadow(0 0 8px rgba(255,80,60,.9))"/><rect id="pabtn" x="736" y="575" width="62" height="54" fill="transparent" style="cursor:pointer"/></svg><text x="100" y="158" text-anchor="middle" font-size="12" fill="#5b6b7b">SVP-688W · tablou</text>
+      <rect x="250" y="50" width="160" height="70" rx="10" fill="#fdecea" stroke="#b42318"/>
+      <text x="330" y="80" text-anchor="middle" font-size="14" font-weight="700">Cloud Tuya</text>
+      <text x="330" y="100" text-anchor="middle" font-size="12" fill="#5b6b7b">internet</text>
+      <rect x="250" y="160" width="160" height="60" rx="10" fill="#fff" stroke="#5b6b7b"/>
+      <text x="330" y="195" text-anchor="middle" font-size="14">Aplicația Smart Life</text>
+      <line x1="133" y1="85" x2="248" y2="85" stroke="#b42318" stroke-width="2.5" marker-end="url(#arR)"/>
+      <line x1="330" y1="120" x2="330" y2="158" stroke="#b42318" stroke-width="2.5" marker-end="url(#arR)"/>
+      <text x="20" y="260" font-size="13" fill="#5b6b7b">Fără internet → aparatul nu mai poate fi comandat.</text>
+      <text x="20" y="280" font-size="13" fill="#5b6b7b">Datele de consum ajung la terți.</text>
+
+      <line x1="470" y1="20" x2="470" y2="310" stroke="#d5dee7" stroke-width="2" stroke-dasharray="6 6"/>
+
+      <!-- DUPĂ -->
+      <text x="500" y="26" font-size="17" font-weight="700" fill="#0b2f4a">DUPĂ – local (ConectLab)</text>
+      <svg x="549" y="36" width="62" height="110" viewBox="460 95 400 710" role="img" aria-label="Releul Sinotimer SVP-688W"><defs><linearGradient id='pbstbd'><stop offset='0' stop-color='#d9dde2'/><stop offset='.5' stop-color='#f4f6f8'/><stop offset='1' stop-color='#cfd4da'/></linearGradient><linearGradient id='pbstfc' x2='0' y2='1'><stop offset='0' stop-color='#e9ecef'/><stop offset='1' stop-color='#d6dade'/></linearGradient><radialGradient id='pbstsc'><stop offset='0' stop-color='#e8e8e8'/><stop offset='.7' stop-color='#9aa0a6'/><stop offset='1' stop-color='#5f656b'/></radialGradient><filter id='pbstsh' x='-20%' y='-10%' width='140%' height='130%'><feDropShadow dy='10' stdDeviation='12' flood-opacity='.65'/></filter></defs><g filter='url(#pbstsh)'><rect x='490' y='105' width='340' height='105' rx='6' fill='url(#pbstbd)'/><rect x='470' y='200' width='380' height='470' rx='10' fill='url(#pbstbd)' stroke='#b9c0c7'/><rect x='490' y='660' width='340' height='135' rx='6' fill='url(#pbstbd)'/></g><circle cx='565' cy='155' r='26' fill='#fff' stroke='#c9ced3'/><circle cx='565' cy='155' r='19' fill='url(#pbstsc)'/><path d='M554 155H576M565 144V166' stroke='#555' stroke-width='3'/><circle cx='755' cy='155' r='26' fill='#fff' stroke='#c9ced3'/><circle cx='755' cy='155' r='19' fill='url(#pbstsc)'/><path d='M744 155H766M755 144V166' stroke='#555' stroke-width='3'/><circle cx='565' cy='740' r='26' fill='#fff' stroke='#c9ced3'/><circle cx='565' cy='740' r='19' fill='url(#pbstsc)'/><path d='M554 740H576M565 729V751' stroke='#555' stroke-width='3'/><circle cx='755' cy='740' r='26' fill='#fff' stroke='#c9ced3'/><circle cx='755' cy='740' r='19' fill='url(#pbstsc)'/><path d='M744 740H766M755 729V751' stroke='#555' stroke-width='3'/><rect x='632' y='137' width='56' height='36' rx='4' fill='#eef0f2' stroke='#cdd2d7'/><rect x='626' y='722' width='68' height='36' rx='4' fill='#eef0f2' stroke='#cdd2d7'/><text x='660' y='164' font-family='Arial' font-size='22' fill='#9aa1a8' text-anchor='middle'>IN</text><text x='660' y='749' font-family='Arial' font-size='22' fill='#9aa1a8' text-anchor='middle'>OUT</text><text x='565' y='698' font-family='Arial' font-size='20' fill='#9aa1a8' text-anchor='middle'>N</text><text x='755' y='698' font-family='Arial' font-size='20' fill='#9aa1a8' text-anchor='middle'>L</text><rect x='482' y='215' width='356' height='430' rx='8' fill='url(#pbstfc)' stroke='#c3c9cf'/><text x='500' y='253' font-family='Arial' font-size='21' fill='#d6231f' font-weight='900'>SINOTIMER</text><text x='630' y='252' font-family='Arial' font-size='13' fill='#5a636c' >WiFi-Smart Meter&amp;Energy Protector</text><text transform='translate(492,337) rotate(90)' font-family='Arial' font-weight='700' font-size='13' fill='#3d454d'>SVP-688W</text><text x='486' y='490' font-family='Arial' font-size='15' fill='#3d454d' font-weight='700'>CE</text><rect x='506' y='299' width='308' height='192' rx='6' fill='#8b9198'/><rect x='512' y='305' width='296' height='180' rx='3' fill='#050608'/><g transform='translate(524,357) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='46' fill='#2a1010' letter-spacing='2'>8888</text></g><g transform='translate(672,357) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='50' fill='#2a1010' letter-spacing='2'>888</text></g><g transform='translate(534,415) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='44' fill='#121a36' letter-spacing='2'>888</text></g><g transform='translate(672,415) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='40' fill='#0f240f' letter-spacing='2'>888</text></g><g transform='translate(524,468) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='44' fill='#0f240f' letter-spacing='2'>888</text></g><g transform='translate(672,468) skewX(-6)'><text font-family='Consolas,monospace' font-weight='700' font-size='44' fill='#0f240f' letter-spacing='2'>888</text></g><text x='774' y='377' font-family='Arial' font-size='14' fill='#ff3b30' font-weight='700'>KW/h</text><text x='642' y='415' font-family='Arial' font-size='14' fill='#6f8cff' >V</text><text x='642' y='470' font-family='Arial' font-size='14' fill='#5fdc5f' >A</text><text x='774' y='417' font-family='Arial' font-size='14' fill='#5fdc5f' >mA</text><rect x='818' y='375' width='18' height='44' rx='3' fill='none' stroke='#7a828a'/><text x='522' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>PULSE</text><circle cx='522' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><text x='590' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>WIFI</text><circle cx='590' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><text x='658' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>V</text><circle cx='658' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><text x='726' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>A</text><circle cx='726' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><text x='794' y='535' font-family='Arial' font-size='12' fill='#4a535c' text-anchor='middle'>LEAKAGE</text><circle cx='794' cy='553' r='8' fill='#9aa1a8' stroke='#6b737b'/><rect x='508' y='575' width='62' height='54' rx='8' fill='#f2f3f5' stroke='#c6ccd2'/><rect x='584' y='575' width='62' height='54' rx='8' fill='#f2f3f5' stroke='#c6ccd2'/><rect x='660' y='575' width='62' height='54' rx='8' fill='#f2f3f5' stroke='#c6ccd2'/><text x='539' y='610' font-family='Arial' font-size='17' fill='#2c5bd6' text-anchor='middle' font-weight='900'>SET</text><path d='M615 589l13 22h-26z' fill='#1e9aa6'/><text x='691' y='598' font-family='Arial' font-size='14' fill='#2c5bd6' text-anchor='middle' font-weight='900'>WIFI</text><path d='M691 621l-11-14h22z' fill='#1e9aa6'/><rect x='736' y='575' width='62' height='54' rx='8' fill='#e5302b' stroke='#b81f1b'/><path d='M758 593a14 14 0 1 0 20 0M768 587V603' fill='none' stroke='#fff' stroke-width='4' stroke-linecap='round'/>
+ 
+ <g transform="translate(724,341) skewX(-6)"><text id="pbkwh" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="46" fill="#ff3b30" letter-spacing="2" style="filter:drop-shadow(0 0 5px #ff3b30)">0.0</text></g><g transform="translate(582,401) skewX(-6)"><text id="pbv" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="42" fill="#6f8cff" letter-spacing="2" style="filter:drop-shadow(0 0 5px #6f8cff)">225</text></g><g transform="translate(724,401) skewX(-6)"><text id="pbma" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="40" fill="#5fdc5f" letter-spacing="2" style="filter:drop-shadow(0 0 5px #5fdc5f)">0</text></g><g transform="translate(578,454) skewX(-6)"><text id="pba" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="40" fill="#5fdc5f" letter-spacing="2" style="filter:drop-shadow(0 0 5px #5fdc5f)">0.02</text></g><g transform="translate(724,453) skewX(-6)"><text id="pbst" text-anchor="middle" dominant-baseline="central" font-family="Consolas,'Courier New',monospace" font-weight="700" font-size="40" fill="#5fdc5f" letter-spacing="2" style="filter:drop-shadow(0 0 5px #5fdc5f)"> ON</text></g>
+ <circle style="filter:drop-shadow(0 0 6px #ff3b30)" id="pbled0" cx="522" cy="553" r="8" fill="#ff3b30"/><circle style="filter:drop-shadow(0 0 6px #ff3b30)" id="pbled1" cx="590" cy="553" r="8" fill="#ff3b30"/><circle style="filter:drop-shadow(0 0 6px #ff3b30)" id="pbled2" cx="658" cy="553" r="8" fill="#ff3b30"/><circle style="filter:drop-shadow(0 0 6px #4c7dff)" id="pbled3" cx="726" cy="553" r="8" fill="#4c7dff"/><circle id="pbled4" cx="794" cy="553" r="8" fill="#9aa1a8"/><rect id="pbpw" x="736" y="575" width="62" height="54" rx="8" fill="none" stroke="#ff5a3c" stroke-width="3" style="filter:drop-shadow(0 0 8px rgba(255,80,60,.9))"/><rect id="pbbtn" x="736" y="575" width="62" height="54" fill="transparent" style="cursor:pointer"/></svg><text x="580" y="158" text-anchor="middle" font-size="12" fill="#5b6b7b">SVP-688W · IP fix în LAN</text>
+      <rect x="760" y="50" width="180" height="70" rx="10" fill="#e7f6ec" stroke="#15803d"/>
+      <text x="850" y="80" text-anchor="middle" font-size="14" font-weight="700">Home Assistant</text>
+      <text x="850" y="100" text-anchor="middle" font-size="12" fill="#5b6b7b">Tuya Local / LocalTuya</text>
+      <line x1="613" y1="78" x2="758" y2="78" stroke="#15803d" stroke-width="2.5" marker-end="url(#arG)"/>
+      <line x1="758" y1="94" x2="615" y2="94" stroke="#15803d" stroke-width="2.5" marker-end="url(#arG)"/>
+      <text x="709" y="70" text-anchor="middle" font-size="11" fill="#15803d">TCP 6668</text>
+      <rect x="500" y="170" width="160" height="60" rx="10" fill="#fff" stroke="#5b6b7b"/>
+      <text x="580" y="198" text-anchor="middle" font-size="14" font-weight="700">Router</text>
+      <text x="580" y="216" text-anchor="middle" font-size="12" fill="#5b6b7b">regulă: IP aparat → WAN blocat</text>
+      <rect x="760" y="170" width="180" height="60" rx="10" fill="#fdecea" stroke="#b42318" stroke-dasharray="5 4"/>
+      <text x="850" y="205" text-anchor="middle" font-size="14" fill="#b42318">Cloud Tuya</text>
+      <line x1="660" y1="200" x2="740" y2="200" stroke="#b42318" stroke-width="2.5"/>
+      <line x1="728" y1="188" x2="752" y2="212" stroke="#b42318" stroke-width="3"/>
+      <line x1="752" y1="188" x2="728" y2="212" stroke="#b42318" stroke-width="3"/>
+      <line x1="580" y1="166" x2="580" y2="170" stroke="#5b6b7b" stroke-width="2" stroke-dasharray="4 4"/>
+      <text x="500" y="260" font-size="13" fill="#5b6b7b">Comandă și citire doar în rețeaua locală.</text>
+      <text x="500" y="280" font-size="13" fill="#5b6b7b">Protecțiile aparatului rămân neatinse.</text>
+
+      <defs>
+        <marker id="arR" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#b42318"/></marker>
+        <marker id="arG" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#15803d"/></marker>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="path">
+    <div class="card">
+      <span class="tag go">RECOMANDAT ACUM</span>
+      <h3>Calea A – firmware original, cheie locală</h3>
+      <ul>
+        <li>Nu se desface aparatul, nu se lipește nimic.</li>
+        <li>Cloud-ul se folosește <b>o singură dată</b>, doar ca să aflăm cheia locală (local key).</li>
+        <li>Apoi Home Assistant comandă aparatul în LAN, iar routerul îi taie accesul la internet.</li>
+        <li>Protecțiile (U, I, reconectare) rămân exact cum le-a reglat producătorul.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag wait">DUPĂ CE VEDEM PLACA</span>
+      <h3>Calea B – firmware propriu</h3>
+      <ul>
+        <li>Se rescrie doar modulul WiFi (OpenBeken / ESPHome), cu MQTT direct spre broker.</li>
+        <li>Zero cod de la producător în rețea.</li>
+        <li>Cere desfacerea aparatului și identificarea cipului.</li>
+        <li>Detalii în fila 4.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>De ce ai nevoie</h3>
+    <div class="grid2">
+      <ul>
+        <li>Aparatul adăugat în aplicația <b>Smart Life</b> sau <b>Tuya Smart</b>, pe WiFi-ul de 2,4 GHz unde e și Home Assistant.</li>
+        <li>Acces de administrator la <b>router</b> (rezervare DHCP și regulă de firewall).</li>
+        <li>Acces de administrator la <b>Home Assistant</b>, cu HACS instalat.</li>
+      </ul>
+      <ul>
+        <li>Un calculator în aceeași rețea, cu <b>Python 3</b>.</li>
+        <li>Un cont nou pe <b>platform.tuya.com</b> (iot.tuya.com) – gratuit, doar pentru extragerea cheii.</li>
+        <li>Timp estimat: 45–60 de minute.</li>
+      </ul>
+    </div>
+    <div class="danger"><b>Nu șterge aparatul din aplicație și nu-l reîmperechea după ce ai scos cheia.</b> La fiecare reîmperechere Tuya generează o cheie locală nouă și Home Assistant pierde legătura.</div>
+    <div class="warn"><b>Releul taie tot circuitul din aval.</b> Înainte de testele de comandă (pasul 9), anunță utilizatorii circuitului.</div>
+  </div>
+</section>
+
+<!-- ===================== 2 · PAȘII ===================== -->
+<section class="tab" id="t2">
+  <div class="progress">
+    <div class="bar"><div id="progBar"></div></div>
+    <span id="progTxt">0 / 0</span>
+  </div>
+  <p class="noprint" style="color:var(--muted);font-size:14px;margin-top:0">Bifează fiecare pas după ce l-ai terminat. Progresul se păstrează în acest browser.</p>
+
+  <details class="step" open>
+    <summary><span class="num">1</span><span class="title">Fixează IP-ul aparatului în router</span><span class="where">router</span></summary>
+    <div class="body">
+      <ol>
+        <li>În aplicația Smart Life: aparatul → creionul din dreapta sus → <b>Informații dispozitiv</b>. Notează <b>adresa IP</b> și <b>adresa MAC</b>.</li>
+        <li>În router: secțiunea DHCP → <b>rezervare adresă / Static lease</b> → asociază MAC-ul aparatului cu un IP fix (ex. din afara plajei DHCP).</li>
+        <li>Repornește aparatul (sau așteaptă reînnoirea) și verifică în router că a primit IP-ul rezervat.</li>
+      </ol>
+      <div class="note">IP-ul fix e obligatoriu: atât Home Assistant, cât și regula de firewall de la pasul 10 se leagă de el.</div>
+      <label class="check"><input type="checkbox" data-step="s1"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">2</span><span class="title">Creează contul de dezvoltator Tuya și proiectul cloud</span><span class="where">browser</span></summary>
+    <div class="body">
+      <ol>
+        <li>Deschide <b>platform.tuya.com</b> (fostul iot.tuya.com) și fă-ți cont. Este alt cont decât cel din Smart Life.</li>
+        <li><b>Cloud → Development → Create Cloud Project</b>.
+          <ul>
+            <li>Development Method: <b>Smart Home</b></li>
+            <li>Data Center: <b>Central Europe</b> (trebuie să fie același cu al contului Smart Life; pentru România, de regulă Central Europe)</li>
+          </ul>
+        </li>
+        <li>La serviciile API, păstrează <b>IoT Core</b> și <b>Authorization Token Management</b>.</li>
+        <li>Din <b>Overview</b> notează <b>Access ID</b> și <b>Access Secret</b>.</li>
+      </ol>
+      <div class="warn">IoT Core vine cu o perioadă de probă. Dacă la pasul 4 primești eroare de abonament expirat, intră la <b>Cloud → Cloud Services → IoT Core</b> și cere prelungirea gratuită.</div>
+      <label class="check"><input type="checkbox" data-step="s2"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">3</span><span class="title">Leagă contul Smart Life de proiect</span><span class="where">browser + telefon</span></summary>
+    <div class="body">
+      <ol>
+        <li>În proiect: <b>Devices → Link App Account → Add App Account</b>. Apare un cod QR.</li>
+        <li>În Smart Life: <b>Eu (Me)</b> → iconița de scanare din dreapta sus → scanează codul și confirmă.</li>
+        <li>În fila <b>All Devices</b> trebuie să apară SVP-688W. Notează <b>Device ID</b>.</li>
+      </ol>
+      <label class="check"><input type="checkbox" data-step="s3"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">4</span><span class="title">Scoate cheia locală cu tinytuya</span><span class="where">calculator</span></summary>
+    <div class="body">
+      <p>Instalează tinytuya:</p>
+      <div class="cmd"><pre>pip install tinytuya</pre></div>
+      <p>Creează un folder de lucru și intră în el:</p>
+      <div class="cmd"><pre>mkdir sinotimer</pre></div>
+      <div class="cmd"><pre>cd sinotimer</pre></div>
+      <p>Pornește asistentul:</p>
+      <div class="cmd"><pre>python -m tinytuya wizard</pre></div>
+      <ol>
+        <li>Introdu <b>Access ID</b> și <b>Access Secret</b> de la pasul 2.</li>
+        <li>La „Device ID” introdu ID-ul de la pasul 3 (sau scrie <code class="k">scan</code>).</li>
+        <li>La regiune alege <b>eu</b> (Central Europe).</li>
+        <li>La „Poll local devices?” răspunde <b>Y</b>.</li>
+      </ol>
+      <p>Rezultatul: fișierul <b>devices.json</b>, cu <code class="k">id</code>, <code class="k">key</code> (cheia locală), <code class="k">ip</code>, <code class="k">version</code> și <code class="k">mapping</code> (lista DP-urilor). Afișează-l:</p>
+      <div class="cmd"><pre>python -m tinytuya list</pre></div>
+      <div class="danger">Cheia locală e o parolă. Nu o pune în capturi, pe GitHub sau în e-mail. În repository se păstrează doar un model, fără chei.</div>
+      <label class="check"><input type="checkbox" data-step="s4"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">5</span><span class="title">Află versiunea protocolului (scanare în LAN)</span><span class="where">calculator</span></summary>
+    <div class="body">
+      <div class="cmd"><pre>python -m tinytuya scan</pre></div>
+      <p>Caută rândul cu IP-ul aparatului și notează <b>Version</b> (3.3, 3.4 sau 3.5). Îl introduci în Configurator (fila 3).</p>
+      <div class="note">Dacă scanarea nu găsește aparatul: calculatorul e pe altă rețea/VLAN sau firewall-ul calculatorului blochează UDP 6666–6667.</div>
+      <label class="check"><input type="checkbox" data-step="s5"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">6</span><span class="title">Testează comanda locală și citește DP-urile</span><span class="where">calculator</span></summary>
+    <div class="body">
+      <p>Completează fila <b>3 · Configurator</b> și descarcă <b>test_sinotimer.py</b> în folderul <code class="k">sinotimer</code>. Apoi rulează:</p>
+      <div class="cmd"><pre>python test_sinotimer.py</pre></div>
+      <p>Scriptul afișează starea brută (<code class="k">dps</code>), de forma <code class="k">{'1': True, '6': ..., ...}</code>. Compară valorile cu ecranul aparatului (tensiune, curent, putere, kWh) și completează tabelul DP din Configurator: ce înseamnă fiecare DP și cu cât se împarte.</p>
+      <div class="note">Semnificația DP-urilor se ia din <code class="k">mapping</code> din devices.json și se confirmă comparând cu display-ul. Nu presupune numerotarea de la alte aparate.</div>
+      <label class="check"><input type="checkbox" data-step="s6"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">7</span><span class="title">Instalează integrarea locală în Home Assistant</span><span class="where">Home Assistant</span></summary>
+    <div class="body">
+      <ol>
+        <li>Dacă există integrarea oficială <b>Tuya</b> (cloud), șterge aparatul de acolo: <b>Setări → Dispozitive și servicii → Tuya</b>.</li>
+        <li><b>HACS → Integrations</b> → caută <b>Tuya Local</b> (make-all/tuya-local) → Download.</li>
+        <li>Repornește Home Assistant.</li>
+      </ol>
+      <div class="note">Alternativa, dacă Tuya Local nu recunoaște aparatul: <b>LocalTuya</b> (xZetsubou/hass-localtuya), unde DP-urile se asociază manual, după tabelul de la pasul 6.</div>
+      <label class="check"><input type="checkbox" data-step="s7"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">8</span><span class="title">Adaugă aparatul local</span><span class="where">Home Assistant</span></summary>
+    <div class="body">
+      <ol>
+        <li><b>Setări → Dispozitive și servicii → Adaugă integrare → Tuya Local</b>.</li>
+        <li>Alege configurarea manuală și introdu: <b>Device ID</b>, <b>IP</b>, <b>Local key</b>, protocol <b>auto</b> (sau versiunea de la pasul 5).</li>
+        <li>Integrarea propune un tip de aparat. Alege tipul care afișează corect tensiunea, curentul și puterea.</li>
+        <li>Redenumește entitățile (ex. <code class="k">switch.sinotimer_releu</code>, <code class="k">sensor.sinotimer_tensiune</code>).</li>
+      </ol>
+      <label class="check"><input type="checkbox" data-step="s8"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">9</span><span class="title">Verifică funcționarea locală</span><span class="where">Home Assistant</span></summary>
+    <div class="body">
+      <ul>
+        <li>Valorile U, I, P din Home Assistant coincid cu display-ul aparatului.</li>
+        <li>Comanda OFF/ON din Home Assistant acționează releul (cu circuitul anunțat).</li>
+        <li>Apăsarea butonului fizic se vede în Home Assistant în câteva secunde.</li>
+      </ul>
+      <label class="check"><input type="checkbox" data-step="s9"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">10</span><span class="title">Taie accesul aparatului la internet</span><span class="where">router</span></summary>
+    <div class="body">
+      <ol>
+        <li>În router: <b>Firewall / Parental control / Access control</b> → regulă nouă: sursa = IP-ul aparatului (sau MAC-ul), destinația = WAN/Internet, acțiune = <b>Drop / Deny</b>.</li>
+        <li>Lasă permis traficul în LAN (Home Assistant ↔ aparat, TCP 6668).</li>
+        <li>Repornește aparatul (scoate-l de sub tensiune 10 s) și așteaptă 2 minute.</li>
+      </ol>
+      <div class="ok">Rezultatul corect: în Smart Life aparatul apare <b>offline</b>, iar în Home Assistant merge în continuare.</div>
+      <div class="warn">Nu șterge aparatul din Smart Life. Contul de dezvoltator poate rămâne, nu mai e folosit.</div>
+      <label class="check"><input type="checkbox" data-step="s10"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">11</span><span class="title">Energia în panoul Home Assistant</span><span class="where">Home Assistant</span></summary>
+    <div class="body">
+      <ol>
+        <li>Dacă integrarea dă un senzor de energie (kWh): <b>Setări → Panouri → Energie → Consum electric</b> → adaugă-l.</li>
+        <li>Dacă există doar putere (W): <b>Setări → Dispozitive și servicii → Ajutoare → Integrare – senzor Riemann sumă</b>, cu sursa = senzorul de putere, unitate k, metoda <i>left</i>. Senzorul obținut se adaugă în panoul Energie.</li>
+      </ol>
+      <label class="check"><input type="checkbox" data-step="s11"> Pas terminat</label>
+    </div>
+  </details>
+
+  <details class="step">
+    <summary><span class="num">12</span><span class="title">Test de 24 de ore și predare</span><span class="where">final</span></summary>
+    <div class="body">
+      <ul>
+        <li>După 24 h: istoricul U/I/P e continuu, fără goluri lungi.</li>
+        <li>După o pană de curent (sau scoaterea de sub tensiune), aparatul revine singur în Home Assistant.</li>
+        <li>Se predă beneficiarului: IP-ul, numele entităților și fișa din fila 3 (exportată JSON, păstrată intern, nu pe GitHub).</li>
+      </ul>
+      <label class="check"><input type="checkbox" data-step="s12"> Pas terminat</label>
+    </div>
+  </details>
+
+  <button class="btn ghost noprint" id="resetSteps">Resetează bifele</button>
+</section>
+
+<!-- ===================== 3 · CONFIGURATOR ===================== -->
+<section class="tab" id="t3">
+  <div class="card">
+    <h2>Configurator</h2>
+    <p>Completează datele din pașii 1–5. Pagina generează scriptul de test, iar datele <b>rămân doar în acest browser</b> (nu se trimit nicăieri).</p>
+    <div class="grid2">
+      <div>
+        <label for="devName">Nume aparat în HA</label>
+        <input type="text" id="devName" value="Sinotimer SVP-688W">
+        <label for="devId">Device ID</label>
+        <input type="text" id="devId" placeholder="ex. bf12ab34cd56ef78gh90ij" autocomplete="off">
+        <label for="devIp">IP fix</label>
+        <input type="text" id="devIp" placeholder="ex. 192.168.1.50" autocomplete="off">
+      </div>
+      <div>
+        <label for="devKey">Local key</label>
+        <input type="text" id="devKey" placeholder="16 caractere" autocomplete="off">
+        <label for="devVer">Versiune protocol</label>
+        <select id="devVer">
+          <option>3.3</option><option>3.4</option><option>3.5</option>
+        </select>
+        <label for="devLoc">Locație / tablou</label>
+        <input type="text" id="devLoc" placeholder="ex. Tablou T01">
+      </div>
+    </div>
+    <button class="btn" id="genScript">Generează test_sinotimer.py</button>
+    <button class="btn ghost" id="dlScript">Descarcă scriptul</button>
+    <div role="status" id="cfgStatus"></div>
+    <div class="cmd"><div class="lbl">test_sinotimer.py</div><pre id="scriptOut"># Completează câmpurile și apasă „Generează”.</pre></div>
+  </div>
+
+  <div class="card">
+    <h3>Tabelul DP-urilor (se completează la pasul 6)</h3>
+    <table id="dpTable">
+      <thead><tr><th style="width:12%">DP</th><th style="width:22%">Cod din mapping</th><th>Semnificație</th><th style="width:15%">Împărțire</th><th style="width:12%">Unitate</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <button class="btn ghost noprint" id="addDp">+ Rând</button>
+    <button class="btn noprint" id="saveCfg">Salvează în browser</button>
+    <button class="btn ghost noprint" id="expJson">Export JSON</button>
+    <label class="btn ghost noprint" style="display:inline-block">Import JSON<input type="file" id="impJson" accept="application/json" hidden></label>
+    <button class="btn ghost noprint" onclick="window.print()">Tipărește fișa</button>
+    <div role="status" id="dpStatus"></div>
+    <div class="warn">Exportul JSON conține cheia locală. Se păstrează intern (Drive, folder nepublic), nu pe GitHub.</div>
+  </div>
+</section>
+
+<!-- ===================== 4 · CALEA B ===================== -->
+<section class="tab" id="t4">
+  <div class="card">
+    <h2>Calea B – firmware propriu (în pregătire)</h2>
+    <p>Calea B elimină complet codul producătorului din rețea. Se aplică după ce vedem placa aparatului.</p>
+    <h3>Ce trebuie aflat întâi</h3>
+    <ol>
+      <li>Ce modul WiFi are (marcajul de pe modul: CB2S, WB2S, CB3S, TYWE3S, WBR… ).</li>
+      <li>Dacă modulul vorbește cu un microcontroler separat (arhitectura „TuyaMCU”), care face măsurarea, display-ul și protecțiile.</li>
+    </ol>
+    <h3>Ce urmează, după cip</h3>
+    <table>
+      <thead><tr><th>Cip</th><th>Firmware nou</th><th>Mod de scriere</th></tr></thead>
+      <tbody>
+        <tr><td>Beken BK7231N / BK7231T (CB2S, WB2S, CB3S…)</td><td>OpenBeken sau ESPHome (LibreTiny)</td><td>serial USB-TTL; uneori prin aer cu tuya-cloudcutter</td></tr>
+        <tr><td>ESP8266 (TYWE3S, TYWE2S…)</td><td>Tasmota sau ESPHome</td><td>serial USB-TTL</td></tr>
+        <tr><td>Realtek / alte cipuri</td><td>de verificat suportul</td><td>de verificat</td></tr>
+      </tbody>
+    </table>
+    <div class="note">Dacă aparatul are microcontroler separat, se rescrie <b>doar modulul WiFi</b>. Protecțiile rămân în microcontrolerul aparatului, iar modulul nou citește DP-urile prin driverul TuyaMCU și le publică pe MQTT.</div>
+    <div class="danger">Lucrul pe placă se face numai cu aparatul scos din tablou și deconectat de la rețea. Modulul se alimentează la 3,3 V din adaptor, niciodată cu aparatul sub 230 V.</div>
+    <h3>Ce trimiți ca să continuăm</h3>
+    <ul>
+      <li>Poză cu placa, față și spate.</li>
+      <li>Poză clară cu modulul WiFi și marcajul lui.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== 5 · PROBLEME ===================== -->
+<section class="tab" id="t5">
+  <div class="card">
+    <h2>Probleme frecvente</h2>
+    <details><summary><b>Asistentul tinytuya dă eroare de autorizare sau nu găsește aparate</b></summary>
+      <ul>
+        <li>Data center-ul proiectului diferă de cel al contului Smart Life → refă proiectul pe Central Europe.</li>
+        <li>Abonamentul IoT Core a expirat → prelungire gratuită din Cloud Services.</li>
+        <li>Contul Smart Life nu e legat (pasul 3) sau ai legat alt cont.</li>
+      </ul>
+    </details>
+    <details><summary><b>Scriptul de test dă „Device unreachable” sau „decrypt error”</b></summary>
+      <ul>
+        <li>IP greșit sau aparatul a primit alt IP → verifică rezervarea din pasul 1.</li>
+        <li>Versiune de protocol greșită → încearcă 3.4 sau 3.5.</li>
+        <li>Cheie veche: aparatul a fost reîmperecheat → rulează din nou asistentul.</li>
+        <li>Aplicația Smart Life e deschisă pe telefon în același timp → închide-o; unele aparate acceptă o singură conexiune locală.</li>
+      </ul>
+    </details>
+    <details><summary><b>Valorile din HA nu se actualizează</b></summary>
+      <ul>
+        <li>Unele aparate trimit valorile doar la cerere. În Tuya Local/LocalTuya mărește frecvența de interogare.</li>
+        <li>Verifică scara (împărțirea) din tabelul DP: tensiune de 2367 înseamnă de obicei 236,7 V.</li>
+      </ul>
+    </details>
+    <details><summary><b>După blocarea internetului, aparatul dispare și din HA</b></summary>
+      <ul>
+        <li>Regula de firewall blochează și LAN-ul → trebuie să blocheze doar WAN.</li>
+        <li>Aparatul așteaptă după DNS/NTP la pornire. Lasă-l 2–3 minute. Dacă tot nu revine, notează comportamentul în registrul tehnic.</li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Lista de verificare la predare</h2>
+    <table>
+      <thead><tr><th>Verificare</th><th style="width:20%">Rezultat</th></tr></thead>
+      <tbody>
+        <tr><td>U, I, P în HA = display aparat</td><td>☐ DA ☐ NU</td></tr>
+        <tr><td>ON/OFF din HA acționează releul</td><td>☐ DA ☐ NU</td></tr>
+        <tr><td>Buton fizic → stare actualizată în HA</td><td>☐ DA ☐ NU</td></tr>
+        <tr><td>Smart Life arată aparatul offline după blocare</td><td>☐ DA ☐ NU</td></tr>
+        <tr><td>Revine singur după pană de curent</td><td>☐ DA ☐ NU</td></tr>
+        <tr><td>Energie (kWh) în panoul Energie</td><td>☐ DA ☐ NU</td></tr>
+        <tr><td>Fișa JSON salvată intern, fără cheie pe GitHub</td><td>☐ DA ☐ NU</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    ConectLab EB104 · Laboratorul de Sisteme Conectate · Facultatea de Inginerie Electrică, UPB ·
+    <span id="footVer"></span> · Pagina nu transmite date: tot ce completezi rămâne în acest browser.
+  </div>
+</footer>
+
+<script>
+  "use strict";
+
+  const VERSION = "1.0";
+  const CODE = "CL-P01";
+  const STORE_KEY = CODE + "-" + VERSION;
+
+  function $(id) { return document.getElementById(id); }
+
+  function esc(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function status(id, msg) { $(id).textContent = msg; }
+
+  function download(name, content, type) {
+    const blob = new Blob([content], { type: type });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  function loadStore() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); }
+    catch (e) { return {}; }
+  }
+
+  function saveStore(obj) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(obj)); return true; }
+    catch (e) { return false; }
+  }
+
+  /* ---------- versiune ---------- */
+  $("verBadge").textContent = "v" + VERSION;
+  $("footVer").textContent = CODE + " · v" + VERSION;
+
+  /* ---------- file ---------- */
+  document.querySelectorAll("nav button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll("nav button").forEach(function (x) { x.classList.remove("active"); });
+      document.querySelectorAll("section.tab").forEach(function (s) { s.classList.remove("active"); });
+      b.classList.add("active");
+      $(b.dataset.tab).classList.add("active");
+      window.scrollTo({ top: 0 });
+    });
+  });
+
+  /* ---------- butoane de copiere ---------- */
+  function addCopy(box) {
+    if (box.querySelector("button.copy")) return;
+    const btn = document.createElement("button");
+    btn.className = "copy";
+    btn.textContent = "Copiază";
+    btn.addEventListener("click", function () {
+      const txt = box.querySelector("pre").textContent;
+      const done = function () {
+        btn.textContent = "Copiat";
+        btn.classList.add("copied");
+        setTimeout(function () { btn.textContent = "Copiază"; btn.classList.remove("copied"); }, 1500);
+      };
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(txt).then(done, function () { fallbackCopy(txt); done(); });
+      } else { fallbackCopy(txt); done(); }
+    });
+    box.appendChild(btn);
+  }
+  function fallbackCopy(txt) {
+    const ta = document.createElement("textarea");
+    ta.value = txt;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    ta.remove();
+  }
+  document.querySelectorAll(".cmd").forEach(addCopy);
+
+  /* ---------- progres pași ---------- */
+  const checks = document.querySelectorAll("input[data-step]");
+  function updateProgress() {
+    let n = 0;
+    checks.forEach(function (c) {
+      const step = c.closest(".step");
+      step.classList.toggle("done", c.checked);
+      if (c.checked) n++;
+    });
+    $("progBar").style.width = (100 * n / checks.length) + "%";
+    $("progTxt").textContent = n + " / " + checks.length;
+  }
+  (function restoreSteps() {
+    const st = loadStore();
+    const done = st.steps || {};
+    checks.forEach(function (c) { c.checked = !!done[c.dataset.step]; });
+    updateProgress();
+  })();
+  checks.forEach(function (c) {
+    c.addEventListener("change", function () {
+      const st = loadStore();
+      st.steps = st.steps || {};
+      st.steps[c.dataset.step] = c.checked;
+      saveStore(st);
+      updateProgress();
+    });
+  });
+  $("resetSteps").addEventListener("click", function () {
+    const st = loadStore();
+    st.steps = {};
+    saveStore(st);
+    checks.forEach(function (c) { c.checked = false; });
+    updateProgress();
+  });
+
+  /* ---------- configurator ---------- */
+  const FIELDS = ["devName", "devId", "devIp", "devKey", "devVer", "devLoc"];
+
+  function readCfg() {
+    const c = {};
+    FIELDS.forEach(function (f) { c[f] = $(f).value.trim(); });
+    return c;
+  }
+
+  function validIp(ip) {
+    const p = ip.split(".");
+    return p.length === 4 && p.every(function (x) { return /^\d{1,3}$/.test(x) && +x <= 255; });
+  }
+
+  function buildScript(c) {
+    return [
+      "# " + CODE + " v" + VERSION + " - test local Sinotimer SVP-688W",
+      "# Rulare: python test_sinotimer.py",
+      "# ATENTIE: fisierul contine cheia locala - nu-l publica.",
+      "import json",
+      "import tinytuya",
+      "",
+      "d = tinytuya.Device(",
+      "    dev_id=" + JSON.stringify(c.devId) + ",",
+      "    address=" + JSON.stringify(c.devIp) + ",",
+      "    local_key=" + JSON.stringify(c.devKey) + ",",
+      "    version=" + c.devVer + ",",
+      ")",
+      "d.set_socketTimeout(5)",
+      "",
+      "stare = d.status()",
+      "print(json.dumps(stare, indent=2, ensure_ascii=False))",
+      "",
+      "if 'Error' in stare:",
+      "    print('\\nNu raspunde local. Verifica IP-ul, cheia si versiunea (3.3/3.4/3.5).')",
+      "else:",
+      "    print('\\nOK: aparatul raspunde local, fara cloud.')",
+      "    print('Compara valorile din dps cu display-ul aparatului.')",
+      ""
+    ].join("\n");
+  }
+
+  function genScript() {
+    const c = readCfg();
+    const errs = [];
+    if (!c.devId) errs.push("Device ID");
+    if (!validIp(c.devIp)) errs.push("IP valid");
+    if (c.devKey.length < 8) errs.push("Local key");
+    if (errs.length) {
+      status("cfgStatus", "Lipsește / greșit: " + errs.join(", ") + ".");
+      return null;
+    }
+    const s = buildScript(c);
+    $("scriptOut").textContent = s;
+    status("cfgStatus", "Script generat. Copiază-l sau descarcă-l.");
+    return s;
+  }
+
+  $("genScript").addEventListener("click", genScript);
+  $("dlScript").addEventListener("click", function () {
+    const s = genScript();
+    if (s) download("test_sinotimer.py", s, "text/x-python");
+  });
+
+  /* ---------- tabel DP ---------- */
+  function addDpRow(r) {
+    r = r || {};
+    const tr = document.createElement("tr");
+    ["dp", "code", "mean", "scale", "unit"].forEach(function (k) {
+      const td = document.createElement("td");
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.dataset.k = k;
+      inp.value = r[k] || "";
+      td.appendChild(inp);
+      tr.appendChild(td);
+    });
+    $("dpTable").querySelector("tbody").appendChild(tr);
+  }
+
+  function readDp() {
+    const rows = [];
+    $("dpTable").querySelectorAll("tbody tr").forEach(function (tr) {
+      const r = {};
+      tr.querySelectorAll("input").forEach(function (i) { r[i.dataset.k] = i.value.trim(); });
+      if (r.dp || r.code || r.mean) rows.push(r);
+    });
+    return rows;
+  }
+
+  function fillDp(rows) {
+    $("dpTable").querySelector("tbody").innerHTML = "";
+    (rows && rows.length ? rows : [{}, {}, {}, {}, {}, {}]).forEach(addDpRow);
+  }
+
+  $("addDp").addEventListener("click", function () { addDpRow(); });
+
+  function collectAll() {
+    return {
+      code: CODE,
+      version: VERSION,
+      saved: new Date().toISOString(),
+      device: readCfg(),
+      dp: readDp()
+    };
+  }
+
+  function applyAll(o) {
+    FIELDS.forEach(function (f) { if (o.device && o.device[f] !== undefined) $(f).value = o.device[f]; });
+    fillDp(o.dp);
+  }
+
+  $("saveCfg").addEventListener("click", function () {
+    const st = loadStore();
+    const all = collectAll();
+    st.device = all.device;
+    st.dp = all.dp;
+    status("dpStatus", saveStore(st) ? "Salvat în acest browser." : "Browserul nu permite salvarea – folosește Export JSON.");
+  });
+
+  $("expJson").addEventListener("click", function () {
+    const name = (CODE + "_" + ($("devName").value || "aparat")).replace(/[^A-Za-z0-9_-]+/g, "_") + "_fisa.json";
+    download(name, JSON.stringify(collectAll(), null, 2), "application/json");
+    status("dpStatus", "Exportat: " + name);
+  });
+
+  $("impJson").addEventListener("change", function (ev) {
+    const f = ev.target.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = function () {
+      try {
+        const o = JSON.parse(rd.result);
+        if (o.code !== CODE || !o.device) throw new Error("fișier străin");
+        applyAll(o);
+        status("dpStatus", "Importat (salvat cu v" + esc(o.version || "?") + ").");
+      } catch (e) {
+        status("dpStatus", "Fișier respins: nu este o fișă " + CODE + ".");
+      }
+      ev.target.value = "";
+    };
+    rd.readAsText(f);
+  });
+
+  (function restoreCfg() {
+    const st = loadStore();
+    if (st.device) applyAll(st);
+    else fillDp([]);
+  })();
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-# ConectLab-01 · Sinotimer SVP-688W local, fără cloud
+# CL-P01 · Sinotimer SVP-688W local, fără cloud
 
 **ConectLab EB104 – Laboratorul de Sisteme Conectate**, Facultatea de Inginerie Electrică, UPB.
 
@@ -9,7 +9,8 @@ Ghid interactiv pas cu pas: protectorul de energie WiFi Sinotimer SVP-688W (cont
 | Fișier | Conținut |
 |---|---|
 | `index.html` | aplicația (aceeași cu fișierul versionat) |
-| `ConectLab_01_Sinotimer_Local_v1.0.html` | aplicația, versiunea 1.0 |
+| `CONECTLAB_CL-P01_Sinotimer_Local_v1.0.html` | aplicația, versiunea 1.0 (proiect ConectLab CL-P01) |
+| `ConectLab_01_Sinotimer_Local_v1.0.html` | redirecționare spre numele nou (adresă veche) |
 
 ## Ce conține
 1. **Începe aici** – arhitectura înainte/după, cele două căi, ce trebuie pregătit.

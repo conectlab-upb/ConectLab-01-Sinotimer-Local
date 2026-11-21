@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "Dacă folosiți acest material, vă rugăm să îl citați astfel. / If you use this work, please cite it as below."
+title: "ConectLab-01 – Sinotimer SVP-688W în Home Assistant, local, fără cloud"
+type: software
+authors:
+  - family-names: Argatu
+    given-names: Florin-Ciprian
+    orcid: "https://orcid.org/0000-0003-0606-6273"
+    affiliation: "National University of Science and Technology POLITEHNICA Bucharest, Faculty of Electrical Engineering"
+  - family-names: Adochiei
+    given-names: Felix-Constantin
+    affiliation: "National University of Science and Technology POLITEHNICA Bucharest, Faculty of Electrical Engineering"
+repository-code: "https://github.com/conectlab-upb/ConectLab-01-Sinotimer-Local"
+license: CC-BY-NC-ND-4.0
+abstract: "Ghid interactiv pas cu pas pentru integrarea locală, fără cloud, a temporizatorului Sinotimer SVP-688W în Home Assistant (proiect ConectLab EB104, UPB)."
+keywords:
+  - Sinotimer
+  - Home Assistant
+  - local control
+  - IoT
+  - ConectLab

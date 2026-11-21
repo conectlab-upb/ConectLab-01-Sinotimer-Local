@@ -1,5 +1,7 @@
 # CL-P01 · Sinotimer SVP-688W local, fără cloud
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24411954.svg)](https://doi.org/10.5281/zenodo.24411954)
+
 **ConectLab EB104 – Laboratorul de Sisteme Conectate**, Facultatea de Inginerie Electrică, UPB.
 
 Ghid interactiv pas cu pas: protectorul de energie WiFi Sinotimer SVP-688W (contor, protecție la supra/subtensiune și supracurent, șină DIN) este comandat și citit din Home Assistant doar în rețeaua locală, fără cloud-ul producătorului.
@@ -31,4 +33,4 @@ Ghid interactiv pas cu pas: protectorul de energie WiFi Sinotimer SVP-688W (cont
 
 Materialul este publicat sub licența [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/): poate fi distribuit cu citarea autorilor, doar în scop necomercial și fără versiuni modificate. Detalii în [`LICENSE`](LICENSE).
 
-**Citare:** folosiți butonul *Cite this repository* (dreapta sus, generat din [`CITATION.cff`](CITATION.cff)). DOI-ul permanent (Zenodo) se adaugă la primul release.
+**Citare:** folosiți butonul *Cite this repository* (dreapta sus, generat din [`CITATION.cff`](CITATION.cff)). DOI permanent (Zenodo, toate versiunile): [10.5281/zenodo.24411954](https://doi.org/10.5281/zenodo.24411954).
